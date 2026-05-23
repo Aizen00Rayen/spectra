@@ -1,131 +1,133 @@
-# Deploying Spectra to Hostinger
+# Deploying Spectra — Hostinger Node.js Hosting via GitHub
 
-## Stack
-- **Frontend**: Vite + React (builds to static files in `frontend/dist/`)
-- **Backend**: Node.js + Express (serves the API + the frontend static files in production)
-- **Storage**: JSON files in `backend/data/` (no database needed)
-
----
-
-## Project Structure
+## How it works
 
 ```
-spectra-agency-website/
-├── frontend/          ← Vite + React app
-│   ├── src/
-│   ├── public/
-│   └── dist/          ← generated after `npm run build`
-└── backend/           ← Express API server
-    ├── data/          ← JSON data files (portfolio, messages, admin)
-    ├── routes/
-    └── server.js
+git push to main
+      ↓
+GitHub Actions builds frontend (npm run build)
+      ↓
+Pushes a ready-to-run "production" branch to GitHub
+      ↓
+Hostinger hPanel pulls from "production" branch
+      ↓
+Live website ✅
 ```
 
 ---
 
-## Local Development
+## One-time setup
 
-```bash
-# 1. Set up backend
-cd backend
-cp .env.example .env       # fill JWT_SECRET (any long random string)
-npm run seed               # creates data/admin.json with default credentials
-npm run dev                # starts API on http://localhost:5000
+### Step 1 — Let GitHub Actions run once
 
-# 2. Start frontend (separate terminal)
-cd frontend
-npm run dev                # starts on http://localhost:3000
-```
+Push any change to `main`. The **Actions** tab on GitHub will show a
+`Build & Deploy to Production` job running. Wait for it to finish —
+it creates the `production` branch automatically.
 
-Open `http://localhost:3000` — API calls are proxied to port 5000 automatically.
-
-Admin panel: `http://localhost:3000/admin/login`
+Verify at:
+`https://github.com/Aizen00Rayen/spectra/tree/production`
 
 ---
 
-## Production Build & Deploy (Hostinger)
+### Step 2 — Hostinger hPanel configuration
 
-### Step 1 — Build the React frontend
+1. Log into **hPanel → Hosting → Node.js**
+2. Click **Create Application** (or manage existing)
+3. Set these values:
 
-```bash
-cd frontend
-npm run build
-# outputs to frontend/dist/
-```
+| Field                  | Value                                              |
+|------------------------|----------------------------------------------------|
+| **Node.js version**    | 18 (or latest LTS)                                 |
+| **Application root**   | `/` (project root)                                 |
+| **Application URL**    | your domain                                        |
+| **Application startup file** | `app.js`                                    |
 
-### Step 2 — Upload to Hostinger
+4. Click **Save**
 
-Upload the following to your Hostinger Node.js hosting directory:
+---
 
-```
-backend/           (everything in backend/)
-frontend/dist/     (the built React app)
-```
+### Step 3 — Connect GitHub repository
 
-The folder layout on the server should be:
+Inside hPanel Node.js settings → **Git** tab:
 
-```
-/home/user/domains/yourdomain.com/
-├── backend/
-│   ├── server.js
-│   ├── data/
-│   ├── routes/
-│   ├── middleware/
-│   ├── config/
-│   ├── package.json
-│   └── node_modules/
-└── frontend/
-    └── dist/
-```
+1. Connect your GitHub account
+2. Select repo: `Aizen00Rayen/spectra`
+3. Branch: **`production`** ← important, NOT main
+4. Click **Deploy**
 
-### Step 3 — Configure Hostinger hPanel
+hPanel will clone the `production` branch. This branch already has
+the built `frontend/dist/` included, so no build step is needed
+on the server.
 
-1. Go to **hPanel → Hosting → Node.js**
-2. Set:
-   - **Entry point**: `backend/server.js`
-   - **Node version**: 18 or higher
-3. Add **Environment Variables**:
-   ```
-   NODE_ENV=production
-   PORT=3000               (or whatever Hostinger assigns)
-   JWT_SECRET=your_secret
-   ```
-4. Click **Restart App**
+---
 
-### Step 4 — Install dependencies on server
+### Step 4 — Set environment variables
+
+In hPanel → **Environment Variables**, add:
+
+| Key              | Value                                      |
+|------------------|--------------------------------------------|
+| `NODE_ENV`       | `production`                               |
+| `JWT_SECRET`     | (any long random string, 32+ characters)   |
+| `PORT`           | Leave empty — Hostinger injects this automatically |
+
+---
+
+### Step 5 — Install backend dependencies & seed admin
+
+In hPanel → **Node.js** → **Terminal** (or SSH):
 
 ```bash
+# Install backend dependencies
 cd backend && npm install --omit=dev
+
+# Create your admin account (run once)
+ADMIN_EMAIL=you@yourdomain.com ADMIN_PASSWORD=YourStrongPassword node scripts/seed-admin.js
 ```
 
-### Step 5 — Seed admin (run once)
+---
+
+### Step 6 — Restart the app
+
+In hPanel → Node.js → click **Restart Application**
+
+Your site is now live at your domain! 🎉
+
+---
+
+## Automatic deploys (after setup)
+
+Every time you push to `main`:
+1. GitHub Actions builds the frontend
+2. Updates the `production` branch
+3. **hPanel auto-deploys** (if auto-deploy is enabled in Git settings)
+
+Or manually: hPanel → Git → **Pull**
+
+---
+
+## Local development
 
 ```bash
+# Backend
 cd backend
-ADMIN_EMAIL=you@yourdomain.com ADMIN_PASSWORD=YourStrongPass node scripts/seed-admin.js
+cp .env.example .env   # set JWT_SECRET
+npm run seed           # create admin user
+npm run dev            # http://localhost:5000
+
+# Frontend (new terminal)
+cd frontend
+npm run dev            # http://localhost:3000
 ```
 
 ---
 
-## Admin Credentials (defaults)
+## Admin panel
 
-| Field    | Default               |
-|----------|-----------------------|
-| Email    | admin@spectra.dev     |
-| Password | Spectra@2025!         |
+URL: `https://yourdomain.com/admin/login`
 
-> ⚠️ Change these by editing `backend/.env` before seeding, or delete `backend/data/admin.json` and re-run `npm run seed` with new values.
+Default credentials (from seed script):
+- Email: `admin@spectra.dev`
+- Password: `Spectra@2025!`
 
----
-
-## Data Files
-
-All data lives in `backend/data/`:
-
-| File             | Contents                        |
-|------------------|---------------------------------|
-| `portfolio.json` | Array of portfolio projects     |
-| `messages.json`  | Array of contact form messages  |
-| `admin.json`     | Single admin user (hashed)      |
-
-Back these files up regularly — they are your entire database.
+> ⚠️ Change these by passing your own ADMIN_EMAIL / ADMIN_PASSWORD when running seed.
