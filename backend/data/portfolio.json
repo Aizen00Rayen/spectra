@@ -1,0 +1,114 @@
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567801",
+    "name": "The Bequer",
+    "client": "E-commerce Client",
+    "description": "Premium e-commerce platform for luxury goods",
+    "tags": [
+      "React",
+      "Node.js",
+      "Stripe"
+    ],
+    "category": [
+      "Web",
+      "E-commerce"
+    ],
+    "color": "from-cyan-600 to-blue-500",
+    "url": "thebequer.tech",
+    "order": 1,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2026-05-23T20:47:39.892Z"
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567802",
+    "name": "Results Academy",
+    "client": "EdTech",
+    "description": "Online learning platform with course management",
+    "tags": [
+      "Next.js",
+      "Stripe"
+    ],
+    "category": [
+      "Web",
+      "Education"
+    ],
+    "color": "from-purple-600 to-pink-500",
+    "url": "",
+    "order": 2,
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567803",
+    "name": "MenDari",
+    "client": "Healthcare",
+    "description": "Mental health support and counseling platform",
+    "tags": [
+      "React Native",
+      "Firebase",
+      "WebRTC"
+    ],
+    "category": [
+      "Mobile",
+      "Healthcare"
+    ],
+    "color": "from-green-600 to-teal-500",
+    "url": "",
+    "order": 3,
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567804",
+    "name": "LOCADZ",
+    "client": "Location Services",
+    "description": "Location-based service platform for local businesses",
+    "tags": [
+      "React",
+      "Maps API",
+      "AWS"
+    ],
+    "category": [
+      "Web",
+      "SaaS"
+    ],
+    "color": "from-orange-600 to-red-500",
+    "url": "",
+    "order": 4,
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567805",
+    "name": "Yanova CRM",
+    "client": "Enterprise",
+    "description": "Complete customer relationship management system",
+    "tags": [
+      "Vue.js",
+      "PostgreSQL",
+      "Electron"
+    ],
+    "category": [
+      "Desktop",
+      "Enterprise"
+    ],
+    "color": "from-blue-600 to-cyan-500",
+    "url": "",
+    "order": 5,
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "d8653af8-8679-45ad-af5e-fa0cce3b661f",
+    "name": "hihi",
+    "client": "rayen",
+    "category": [
+      "Mobile"
+    ],
+    "tags": [
+      "React",
+      "Flutter"
+    ],
+    "url": "",
+    "description": "description",
+    "color": "from-rose-600 to-orange-500",
+    "order": 6,
+    "createdAt": "2026-05-23T20:46:25.646Z"
+  }
+]
