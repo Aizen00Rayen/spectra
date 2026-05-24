@@ -1,0 +1,63 @@
+name: Build & Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    name: Build frontend & push to production branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source (main)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Build React frontend
+        run: cd frontend && npm run build
+
+      - name: Install root dependencies (for seed script)
+        run: npm install
+
+      - name: Generate admin credentials
+        env:
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: node backend/scripts/seed-admin.js
+
+      - name: Push production branch
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create a clean orphan branch (no history bloat)
+          git checkout --orphan production
+
+          # Allow frontend/dist and admin.json to be committed on this branch
+          # by removing them from .gitignore
+          sed -i '/frontend\/dist/d' .gitignore
+          sed -i '/backend\/data\/admin\.json/d' .gitignore
+
+          # Stage everything (source + built dist + admin.json)
+          git add -A
+
+          git commit -m "deploy: $(date -u '+%Y-%m-%d %H:%M UTC') [${GITHUB_SHA::7}]"
+
+          git push origin production --force
+
+          echo "✅ Production branch updated successfully"
