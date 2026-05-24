@@ -31,6 +31,15 @@ jobs:
       - name: Build React frontend
         run: cd frontend && npm run build
 
+      - name: Install root dependencies (for seed script)
+        run: npm install
+
+      - name: Generate admin credentials
+        env:
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: node backend/scripts/seed-admin.js
+
       - name: Push production branch
         run: |
           git config user.name  "github-actions[bot]"
@@ -39,11 +48,12 @@ jobs:
           # Create a clean orphan branch (no history bloat)
           git checkout --orphan production
 
-          # Allow frontend/dist to be committed on this branch
-          # by removing it from .gitignore
+          # Allow frontend/dist and admin.json to be committed on this branch
+          # by removing them from .gitignore
           sed -i '/frontend\/dist/d' .gitignore
+          sed -i '/backend\/data\/admin\.json/d' .gitignore
 
-          # Stage everything (source + built dist)
+          # Stage everything (source + built dist + admin.json)
           git add -A
 
           git commit -m "deploy: $(date -u '+%Y-%m-%d %H:%M UTC') [${GITHUB_SHA::7}]"
